@@ -18,18 +18,40 @@ const typeDefs = gql`
     type Query {
         hello: String
         users: [User!]!
+        getUserByEmail(email: String!): User!
+    }
+
+    type Mutation {
+        createUser(name: String!, email: String!): User!
     }
 `;
+const users = [
+    { _id: String(Math.random()), name: 'Débora', email: 'debora@teste.com', active: true },
+    { _id: String(Math.random()), name: 'Matheus', email: 'matheus@teste.com', active: false },
+    { _id: String(Math.random()), name: 'Jose', email: 'jose@teste.com', active: true },
+];
 
 const resolvers = {
     Query: {
         hello: () => 'Hello world',
-        users: () => [
-            { _id: String(Math.random()), name: 'Débora', email: 'debora@teste.com', active: true },
-            { _id: String(Math.random()), name: 'Matheus', email: 'matheus@teste.com', active: false },
-            { _id: String(Math.random()), name: 'Jose', email: 'jose@teste.com', active: true },
-        ],
-    }
+        users: () => users,
+        getUserByEmail: (_, args) => {
+            return users.find((user) => user.email === args.email);
+        },
+    },
+    Mutation: {
+        createUser: (_, args) => {
+            const newUser = {
+                _id: String(Math.random()),
+                name: args.name,
+                email: args.email,
+                active: true,
+            };
+
+            users.push(newUser);
+            return newUser
+        }
+    },
 };
 
 const server = new ApolloServer({ typeDefs, resolvers });
